@@ -2,8 +2,8 @@
 import Data.List
 import Data.Int
 
-chetnoe :: Int -> Int
-chetnoe a = if | mod a 2 == 0 -> a
+even :: Int -> Int
+even a = if | mod a 2 == 0 -> a
 			   | otherwise -> 0
 
 extra :: [Int] -> [Int]
@@ -18,7 +18,7 @@ lastprevlast (x:xs) = if | length (x:xs) < 2 -> [x]
 						 | otherwise -> [last (x:xs) + (last . init $ (x:xs))]
 
 resultList :: [Int] -> [Int]
-resultList (x:xs) = map chetnoe (extra (x:xs))
+resultList (x:xs) = map even (extra (x:xs))
 
 main :: IO()
 main = print . sum . resultList $ spisok
