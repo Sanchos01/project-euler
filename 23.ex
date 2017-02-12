@@ -1,4 +1,5 @@
 defmodule Elxr do
+import Enum, only: [reverse: 1, reduce_while: 3, sum: 1]
 
   def findSumDivisors(a) when a > 0 do
     if a == 1, do: 0, else:
@@ -7,27 +8,29 @@ defmodule Elxr do
   end
 
   def isAbundant?(x), do: if findSumDivisors(x) > x, do: true, else: false
-
-  def streamAbundantNumsTo(a), do: Stream.filter(1..a, &(isAbundant?(&1)))
-  def listAbundantNumsTo(a), do: streamAbundantNumsTo(a) |> Enum.to_list()
-  def streamAbundantNums, do: streamAbundantNumsTo(28123)
+  def streamAbundantNums, do: Stream.filter(1..28123, &(isAbundant?(&1)))
   def listAbundantNums, do: streamAbundantNums |> Enum.to_list()
 
-  def sumAbundant?(a, xs) do
-    Enum.reduce_while(xs, false, fn x, acc ->
-      cond do
-        x > a/2 -> {:halt, acc}
-        isAbundant?(a - x) -> {:halt, true}
-        true -> {:cont, acc}
-      end
-    end)
+  def listSums(a, xs) do
+    reduce_while(xs, [], fn x, acc -> if x + a > 28123, do: {:halt, acc},
+      else: {:cont, [(x+a)|acc]} end) |> reverse()
   end
 
-  def streamAbundantSumsTo(a) do
-    Stream.filter(23..a, fn x -> sumAbundant?(x, streamAbundantNums) end)
+  def sortUniqLists(xs, []), do: xs
+  def sortUniqLists([], xs), do: xs
+  def sortUniqLists([x|xs], [y|ys]) do
+    cond do
+      x < y -> [x|sortUniqLists(xs, [y|ys])]
+      x == y -> sortUniqLists(xs, [y|ys])
+      true -> [y|sortUniqLists([x|xs], ys)]
+    end
   end
 
-  def mainFunc do
-    Enum.reduce(1..28123, 0, fn x, acc -> if sumAbundant?(x, streamAbundantNums), do: acc, else: acc + x end)
+  def listUniqSums(xs \\ listAbundantNums) do
+    Enum.reduce(xs, [], fn x, acc -> listSums(x, xs) |> sortUniqLists(acc) end)
+  end
+
+  def main do
+    sum(1..28123) - sum(listUniqSums)
   end
 end
