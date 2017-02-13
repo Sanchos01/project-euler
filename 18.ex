@@ -1,6 +1,6 @@
 defmodule Elxr do
   
-  def testik do
+  def test do
     Enum.reverse([3,7,4,2,4,6,8,5,9,3]) |> foldTriangle()
   end
 
