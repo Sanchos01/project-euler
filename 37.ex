@@ -30,24 +30,6 @@ import Enum, only: [reduce_while: 3, uniq: 1]
       else: {:cont, acc ++ variations((xs -- [x]), (ys ++ [x]), n)} end)
   end
 
-  def variationsToL(xs, ys, n) do
-    reduce_while(xs, [], fn x, acc -> if length(ys) == n, do: {:halt, acc ++ [ys]},
-      else: {:cont, acc ++ variations((xs -- [x]), ([x] ++ ys), n)} end)
-  end
-
-  def combs([], _), do: []
-  def combs(xs, 1), do: xs
-  def combs(xs, n), do: combs(xs, [], n)
-  defp combs(xs, ys, n) do
-    reduce_while(xs, [], fn x, acc -> if length(ys) == n, do: {:halt, acc ++ [ys]},
-      else: {:cont, acc ++ combs(xs, ys ++ [x], n)} end)
-  end
-
-  def combsR(a), do: variations([1,2,3,4,5,6,7,8,9], numToDigits(a), countNums(a)+1)
-    |> Enum.map(fn x -> digitsToNum(x) end)
-  def combsL(a), do: variationsToL([1,2,3,4,5,6,7,8,9], numToDigits(a), countNums(a)+1)
-    |> Enum.map(fn x -> digitsToNum(x) end)
-
   def countNums(a) do
     if div(a, 10) > 0, do: 1 + countNums(div(a, 10)), else: 1
   end
@@ -65,24 +47,24 @@ import Enum, only: [reduce_while: 3, uniq: 1]
   def isTruncPrime(a) when is_integer(a), do: if a<10, do: false,
     else: isTruncPrime(numToDigits(a))
   def isTruncPrime(xs), do: isTruncPrimeL(xs) && isTruncPrimeR(xs)
-  def isTruncPrimeR(xs) when length(xs) == 1, do: isPrime(hd(xs))
-  def isTruncPrimeR([_|xs]), do: isPrime(digitsToNum(xs)) && isTruncPrimeR(xs)
   def isTruncPrimeL(xs) when length(xs) == 1, do: isPrime(hd(xs))
-  def isTruncPrimeL(xs) do
+  def isTruncPrimeL([_|xs]), do: isPrime(digitsToNum(xs)) && isTruncPrimeL(xs)
+  def isTruncPrimeR(xs) when length(xs) == 1, do: isPrime(hd(xs))
+  def isTruncPrimeR(xs) do
     ys = List.delete_at(xs, length(xs) - 1)
-    isPrime(digitsToNum(ys)) && isTruncPrimeL(ys)
+    isPrime(digitsToNum(ys)) && isTruncPrimeR(ys)
   end
 
-  def biggerTrunc(a) do
-    (combsL(a) |> Enum.filter(fn x -> isTruncPrime(x) end)) ++
-    (combsR(a) |> Enum.filter(fn x -> isTruncPrime(x) end))
+  def allTruncRPrimes, do: allTruncRPrimes([[2],[3],[5],[7]], [], 2)
+  defp allTruncRPrimes([], ys, _), do: ys
+  defp allTruncRPrimes(xs0, ys, n) do
+    xs = Enum.reduce(xs0, [], fn x, acc -> acc ++ variations([1,2,3,4,5,6,7,8,9], x, n) end)
+    |> Enum.filter(fn x -> isPrime(digitsToNum(x)) end)
+    allTruncRPrimes(xs, ys ++ Enum.map(xs, fn x -> digitsToNum(x) end), n + 1)
   end
 
   def main do
-    combs([1,3,7,9], 6)
-    |> Enum.filter(fn xs -> hd(xs) != 1 && List.last(xs) != 1 end)
-    |> Enum.map(fn x -> digitsToNum(x) end)
-    |> Enum.filter(fn x -> isPrime(x) && isTruncPrime(x) end)
+    allTruncRPrimes |> Enum.filter(fn x -> isTruncPrimeL(numToDigits(x)) end) |> Enum.sum()
   end
 
 end
