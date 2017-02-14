@@ -1,9 +1,9 @@
 defmodule Elxr do
-import Enum, only: [reduce_while: 3]
+import Enum, only: [reduce_while: 3, map: 2, max_by: 2, reduce: 3]
 import :math, only: [pow: 2]
   
   def findTriangleNums(a) do
-    Enum.reduce(2..round(a/4), [], fn x, acc -> 
+    reduce(2..round(a/4), [], fn x, acc -> 
       if checkSolution(x, a) == [], do: acc, else: acc ++ checkSolution(x, a)
     end)
   end
@@ -17,8 +17,8 @@ import :math, only: [pow: 2]
   end
 
   def main do
-    10..1000 |> Enum.map(fn x -> [x, length(findTriangleNums(x))] end)
-    |> Enum.max_by(fn x -> List.last(x) end)
+    10..1000 |> map(fn x -> {x, length(findTriangleNums(x))} end)
+    |> max_by(fn {_, x} -> x end)
   end
 
 end
