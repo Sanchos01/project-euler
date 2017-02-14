@@ -9,8 +9,7 @@ import :math, only: [pow: 2]
   end
 
   def checkSolution(x, a) do
-    reduce_while(2..round(a/2), [], fn y, acc -> cond do
-      x + y > a -> {:halt, []}
+    reduce_while(trunc(a/4)..round(a/2), [], fn y, acc -> cond do
       pow(x, 2) + pow(y, 2) == pow(a - x - y, 2) -> {:halt, [{x, y, a - x - y}]}
       true -> {:cont, acc}
     end end)
