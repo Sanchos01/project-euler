@@ -18,12 +18,6 @@ defmodule Elxr do
     if rem(a, x) == 0, do: resDiv(div(a, x), x), else: a
   end
 
-  def nextNumsUniqDivs(a, n) do
-    Enum.to_list(a..(a + n - 1))
-    |> Enum.map(fn x -> findPrimeDivisors(x) end) |> Enum.concat()
-    |> (fn x -> Enum.uniq(x) == x end).()
-  end
-
   def main(n \\ 2, a \\ 2) do
     nums = Enum.to_list(a..(a + n - 1)) |> Enum.reverse()
     Enum.reduce_while(nums, [], fn x, acc -> cond do
