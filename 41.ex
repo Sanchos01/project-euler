@@ -16,7 +16,7 @@ defmodule Elxr do
   def digitsToNum(xs), do: digitsToNum(xs, length(xs))
   defp digitsToNum(xs, 1), do: hd(xs)
   defp digitsToNum([x|xs], n), do: round(x * :math.pow(10, n-1)) + digitsToNum(xs, n-1)
-  
+
   def variations([], _n), do: []
   def variations(_xs, 0), do: []
   def variations(xs, n) do
