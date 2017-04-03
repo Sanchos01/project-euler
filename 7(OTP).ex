@@ -2,25 +2,14 @@ defmodule Elxr do
   import Enum, only: [reverse: 1, reduce_while: 3]
   use GenServer
 
-  def start_link do
-    GenServer.start_link(__MODULE__, [], name: :cache)
-  end
+  def start_link, do: GenServer.start_link(__MODULE__, [], name: :cache)
+  def stop, do: GenServer.stop(:cache)
 
-  def add_prime(num) do
-    GenServer.cast(:cache, {:add_prime, num})
-  end
+  def add_prime(num), do: GenServer.cast(:cache, {:add_prime, num})
+  def get_prime, do: GenServer.call(:cache, :get_prime)
 
-  def get_prime do
-    GenServer.call(:cache, :get_prime)
-  end
-
-  def handle_call(:get_prime, _from, nums) do
-    {:reply, reverse(nums), []}
-  end
-
-  def handle_cast({:add_prime, num}, nums) do
-    {:noreply, [num | nums]}
-  end
+  def handle_call(:get_prime, _from, nums), do: {:reply, reverse(nums), []}  
+  def handle_cast({:add_prime, num}, nums), do: {:noreply, [num | nums]}
 
   def findIndexedPrime(1), do: 2
   def findIndexedPrime(2), do: 3
@@ -30,18 +19,20 @@ defmodule Elxr do
   end
   def indexPrime(n, x, primes) do
     case reducing(x, primes) do
-      :not_yet -> case reducing(x, ys = get_prime()) do
-                    :not_yet -> IO.puts("Unacceptable!!1!")
-                    :next -> indexPrime(n, x + 2, primes)
-                    :final -> case n do
+      :uncertainty -> case reducing(x, ys = get_prime()) do
+                    :uncertainty -> IO.puts("Unacceptable!!1!")
+                    :not_prime -> indexPrime(n, x + 2, primes)
+                    :prime -> case n do
                                 3 -> IO.puts(x)
+                                  stop()
                                 _ -> add_prime(x)
                                   indexPrime(n - 1, x + 2, primes ++ ys)
                               end
                     end
-      :next -> indexPrime(n, x + 2, primes)
-      :final -> case n do
+      :not_prime -> indexPrime(n, x + 2, primes)
+      :prime -> case n do
                   3 -> IO.puts(x)
+                    stop()
                   _ -> add_prime(x)
                     indexPrime(n - 1, x + 2, primes)
       end
@@ -49,10 +40,10 @@ defmodule Elxr do
   end
 
   def reducing(var, primes) do
-    reduce_while(primes, :not_yet, fn x, acc ->
+    reduce_while(primes, :uncertainty, fn x, acc ->
       cond do
-        :math.pow(x, 2) > var -> {:halt, :final}
-        rem(var, x) == 0 -> {:halt, :next}
+        :math.pow(x, 2) > var -> {:halt, :prime}
+        rem(var, x) == 0 -> {:halt, :not_prime}
         true -> {:cont, acc}
       end
     end)

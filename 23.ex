@@ -8,8 +8,8 @@ import Enum, only: [reverse: 1, reduce_while: 3, sum: 1]
   end
 
   def isAbundant?(x), do: if findSumDivisors(x) > x, do: true, else: false
-  def streamAbundantNums, do: Stream.filter(1..28123, &(isAbundant?(&1)))
-  def listAbundantNums, do: streamAbundantNums |> Enum.to_list()
+  def streamAbundantNums(), do: Stream.filter(1..28123, &(isAbundant?(&1)))
+  def listAbundantNums(), do: streamAbundantNums() |> Enum.to_list()
 
   def listSums(a, xs) do
     reduce_while(xs, [], fn x, acc -> if x + a > 28123, do: {:halt, acc},
@@ -21,16 +21,18 @@ import Enum, only: [reverse: 1, reduce_while: 3, sum: 1]
   def sortUniqLists([x|xs], [y|ys]) do
     cond do
       x < y -> [x|sortUniqLists(xs, [y|ys])]
-      x == y -> sortUniqLists(xs, [y|ys])
+      x == y -> [x|sortUniqLists(xs, ys)]
       true -> [y|sortUniqLists([x|xs], ys)]
     end
   end
 
-  def listUniqSums(xs \\ listAbundantNums) do
-    Enum.reduce(xs, [], fn x, acc -> listSums(x, xs) |> sortUniqLists(acc) end)
+  def listUniqSums(xs \\ listAbundantNums())
+  def listUniqSums([]), do: []
+  def listUniqSums([x|xs]) do
+    listSums(x, xs) |> sortUniqLists(listUniqSums(xs))
   end
 
   def main do
-    sum(1..28123) - sum(listUniqSums)
+    sum(1..28123) - sum(listUniqSums())
   end
 end
